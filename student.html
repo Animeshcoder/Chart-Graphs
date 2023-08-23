@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Student Data</title>
+    <style>         
+        #sampleDataTable,
+        #StudentTrendsDataTable,
+        button {
+            display: table;
+            margin: 0 auto;
+          }
+        button {
+            box-sizing: border-box;
+          }
+          
+        
+        table {
+          border-collapse: collapse;
+          margin-bottom: 20px;
+          table-layout: fixed;
+        }
+        
+        th,
+        td {
+          border: 1px solid black;
+          padding: 8px;
+          text-align: center;
+        }
+        
+        th {
+          background-color: #f2f2f2;
+        }
+        
+        button {
+          padding: 12px 20px;
+          cursor: pointer;
+          width: 1112px;
+        }
+        #StudentTrendsDataTable td {
+          width: 261px;
+        }
+        #sampleDataTable td {
+            width: 261px;
+          }          
+  
+      #chartContainer {
+        display: none;
+      }
+      
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <style>
+      #chartContainer {
+        width: 70%;
+        height: 500px;
+        margin: 0 auto;
+        padding: 50px;
+        background-color: white;
+        border: 1px solid black;
+      }
+    </style>
+  </head>
+  <body>
+
+<table id="sampleDataTable">
+  <tr>
+    <th>Key</th>
+    <th>Value</th>
+    <th>Key</th>
+    <th>Value</th>
+  </tr>
+</table>
+</br>
+    <table id="StudentTrendsDataTable">
+      <tr>
+        <th>Exam Code</th>
+        <th>Exam Date</th>
+        <th>Result</th>
+        <th>Percentage</th>
+      </tr>
+    </table>
+    <!-- HTML code for the checkboxes and the "Update Chart" button here -->
+    <div>
+      <button onclick="updateChart()">Select Date And Click Here For Chart</button>
+    </div>
+    <!-- HTML code for the chart here -->
+    <div id="chartContainer">
+      <canvas id="myChart"></canvas>
+    </div>
+
+    <!-- JavaScript code for the chart here -->
+    <script>
+
+// Student data object
+const data = {
+    sampledata: [
+      "Student 1",
+      "18 Years",
+      "JEE",
+      "Male",
+      "2023-06-02 19:00",
+      "2023-24",
+      "Physics Chemistry Math",
+      "ID001",
+      "989898XXXX",
+      "Student1@gmail.com",
+    ],
+    Studenttrendsdata: [
+      [
+      "EX001",
+      "21-July-2023",
+      "Pass",
+      "53%",
+        
+      ],
+      [
+      "EX002",
+      "23-Aug-2023",
+      "Pass",
+      "39%",
+       ],
+       [
+       "EX003",
+       "24-Sept-2023",
+       "Pass",
+       "44%",
+       ]
+     ]
+  };
+    // Get the tables
+const sampleDataTable = document.getElementById("sampleDataTable");
+const StudentTrendsDataTable = document.getElementById("StudentTrendsDataTable");
+
+// Define an array of custom labels for the keys
+const sampleDataLabels = [
+  "Student name", 
+  "Age",
+  "Course" ,
+  "Sex",
+  "Joined Date",
+  "Batch",
+  "Subjects",
+  "Student ID",
+  "Phone No.",
+  "Mail"
+  /* ... */
+];
+
+// Define an array of indices for the values you want to display
+const sampleDataIndices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+// Insert the sample data into the first table
+for (let i = 0; i < sampleDataIndices.length; i += 2) {
+    const index1 = sampleDataIndices[i];
+    const index2 = sampleDataIndices[i + 1];
+    const row = sampleDataTable.insertRow(-1);
+    const cell1 = row.insertCell(0);
+    const cell2 = row.insertCell(1);
+    const cell3 = row.insertCell(2);
+    const cell4 = row.insertCell(3);
+    cell1.innerHTML = sampleDataLabels[i];
+    cell2.innerHTML = data.sampledata[index1];
+    if (index2 !== undefined) {
+      cell3.innerHTML = sampleDataLabels[i + 1];
+      cell4.innerHTML = data.sampledata[index2];
+    }
+  }
+  
+
+// Define an array of custom labels for the column headers in the second table
+const StudentTrendsDataColumnLabels = [
+  "Exam Code", 
+  "Exam Date", 
+  "Result",
+  "Percentage"
+];
+
+// Define an array of indices for the values you want to display in the second table
+const StudentTrendsDataIndices = [0, 1, 2, 3];
+
+// Insert the Student trends data into the second table
+
+// Set the column header text in the second table using custom labels from StudentTrendsDataColumnLabels array.
+for (let j = 0; j < StudentTrendsDataColumnLabels.length; j++) {
+    StudentTrendsDataTable.rows[0].cells[j].innerHTML =
+      StudentTrendsDataColumnLabels[j];
+  }
+  
+  for (let i = 0; i < data.Studenttrendsdata.length; i++) {
+    const rowData = data.Studenttrendsdata[i];
+  
+    const row = StudentTrendsDataTable.insertRow(-1);
+  
+    for (let j = 0; j < StudentTrendsDataIndices.length; j++) {
+      const index = StudentTrendsDataIndices[j];
+  
+      const cell = row.insertCell(j);
+  
+      // If this is the "Reported Date" column
+      if (j === 1) {
+        // Create a label and checkbox element
+        const label = document.createElement("label");
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.name = "date";
+        checkbox.value = rowData[index];
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(rowData[index]));
+  
+        // Append the label to the cell
+        cell.appendChild(label);
+      } else {
+        cell.innerHTML = rowData[index];
+      }
+    }
+  }
+
+// Create a new chart using the 'myChart' canvas element
+var ctx = document.getElementById('myChart').getContext('2d');
+var myChart = new Chart(ctx, {
+  type: 'line', // Set the chart type to line chart
+  data: { // Set the data for the chart
+    datasets: [ // Define an array of datasets for the chart
+      {
+        borderColor: 'rgb(50, 100, 255)', // Set the border color for the first dataset
+        borderWidth: 2, // Set the border width for the first dataset
+        pointRadius: 4, // Set the radius for the points in the first dataset
+      },
+      {
+        data: [32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32],
+        borderColor: 'red', // Set the border color for the second dataset
+        borderWidth: 2, // Set the border width for the second dataset
+        pointRadius: 0, // Set the radius for the points in the second dataset
+      },
+      {
+        data: [80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80],
+        borderColor: 'rgb(255, 215, 0)', // Set the border color for the third dataset
+        borderWidth: 2, // Set the border width for the third dataset
+        pointRadius: 0, // Set the radius for the points in the third dataset
+      }
+    ]
+  },
+  plugins: [ChartDataLabels], // Use the ChartDataLabels plugin for labeling data points
+  options: { // Set the options for the chart
+    layout: {
+      padding: {
+        left: 50 // Set the left padding for the chart layout
+      }
+    },
+    responsive: true, // Enable responsivity for the chart
+    maintainAspectRatio: false, // Disable aspect ratio maintenance for the chart
+    plugins: {
+      legend: {
+        display: false // Hide the chart legend
+      },
+      datalabels: {
+        display: function(context) {
+          return context.datasetIndex === 0; // Display data labels only for the first dataset
+        },
+        align: function(context) {
+          return context.datasetIndex === 0 ? 'top' : 'left'; // Align data labels to the top for the first dataset, and to the left for the other datasets
+        },
+        anchor: function(context) {
+          return context.datasetIndex === 0 ? 'center' : 'start'; // Set the anchor position for the data labels to the center for the first dataset, and to the start for the other datasets
+        },
+        offset: function(context) {
+          return context.datasetIndex === 0 ? 0 : 8; // Set the offset for the data labels to 0 for the first dataset, and to 8 for the other datasets
+        },
+        backgroundColor: function(context) {
+          return context.dataset.backgroundColor; // Set the background color for the data labels from the dataset color
+        },
+        borderRadius: 4, // Set the border radius for the data labels
+        color: 'black', // Set the font color for the data labels
+        font: {
+          weight: 'bold' // Set the font weight for the data labels
+        },
+                   formatter:function(value,context){
+                       if(context.datasetIndex === 0){
+                           return value ;
+                       }else{
+                           return value ;
+                       }
+                   },
+                   padding:6
+               }
+             },
+             scales:{
+              x:{
+                grid: {
+                  borderColor: 'black',
+                },
+                ticks:{
+                    color: "black",
+                    major: {
+                        enabled: true,
+                      },
+                  maxTicksLimit:0,
+                  color:'black'
+                },
+              },
+               y:{
+                grid: {
+                  borderColor: 'black',
+                },
+                ticks: {
+                    color: "black",
+                    major: {
+                        enabled: true,
+                      },
+                maxTicksLimit: 12,
+                color:'black'
+            },
+                   type : 'linear',
+                   min :0,
+                   max :100,
+               }
+             }
+           }
+         });
+         function updateChart() {
+            // Show the chart
+            document.getElementById("chartContainer").style.display = "block";
+          
+            // Get the rows of the second table
+            var rows = document.querySelectorAll("#StudentTrendsDataTable tr");
+          
+            // Initialize an array to store the data
+            var data = [];
+          
+            // Loop through the rows, starting from the second row (index 1)
+            for (var i = 1; i < rows.length; i++) {
+              // Get the cells of the current row
+              var cells = rows[i].cells;
+          
+              // Get the date and ratio from the cells
+              var date = cells[1].querySelector("input").value;
+              var ratio = parseFloat(cells[3].textContent);
+          
+              // Add an object with the date and ratio to the data array
+              data.push({ date: date, value: ratio });
+            }
+          
+            // Filter the data based on the selected dates
+            var selectedDates = Array.from(
+              document.querySelectorAll("#StudentTrendsDataTable input[name='date']:checked")
+            ).map(function (checkbox) {
+              return checkbox.value;
+            });
+            var filteredData = data.filter(function (d) {
+              return selectedDates.includes(d.date);
+            });
+          
+            // Update the chart data and labels
+            myChart.data.labels = [""]
+              .concat(
+                filteredData.map(function (d) {
+                  return d.date;
+                })
+              )
+              .concat([""]);
+            myChart.data.datasets[0].data = [""]
+              .concat(
+                filteredData.map(function (d) {
+                  return d.value;
+                })
+              )
+              .concat([""]);
+            myChart.update();
+          }
+          
+    </script>
+</body>
+</html>
